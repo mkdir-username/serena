@@ -3093,6 +3093,10 @@ class SolidLanguageServer(ABC):
         )
 
         with self.open_file(relative_file_path):
+            # rename is a cross-file request like references/definition: without warming up the
+            # project the LS misses re-export specifiers in barrel files (export { X } from). Parity
+            # with the wait done before find-references so cross-file edits are returned.
+            self._wait_for_cross_file_references_if_needed()
             return self.server.send.rename(params)
 
     def apply_text_edits_to_file(self, relative_path: str, edits: list[ls_types.TextEdit]) -> None:
